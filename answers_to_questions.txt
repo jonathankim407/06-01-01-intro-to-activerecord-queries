@@ -1,0 +1,312 @@
+Part 1
+Provide one or more Active Record queries that retrieve the requested data for each of the following:
+--------------------------------------------------------------------------------
+1. Find the albums recorded by the artist Queen.
+
+irb(main):003:0> Artist.where(name: 'Queen')
+  Artist Load (0.2ms)  SELECT "artists".* FROM "artists" WHERE "artists"."name" = $1  [["name", "Queen"]]
+[
+    [0] #<Artist:0x0055cd61560fc0> {
+                :id => 51,
+              :name => "Queen",
+        :created_at => Sun, 08 Jan 2006 22:57:01 UTC +00:00,
+        :updated_at => Wed, 29 Jan 2014 22:10:22 UTC +00:00
+    }
+]
+
+irb(main):004:0> Album.where(artist_id: 51)
+  Album Load (0.3ms)  SELECT "albums".* FROM "albums" WHERE "albums"."artist_id" = $1  [["artist_id", 51]]
+/home/jonathan/.rbenv/versions/2.4.1/lib/ruby/gems/2.4.0/gems/awesome_print-1.7.0/lib/awesome_print/formatters/base_formatter.rb:31: warning: constant ::Fixnum is deprecated
+[
+    [0] #<Album:0x0055cd61347400> {
+                :id => 36,
+         :artist_id => 51,
+             :title => "Greatest Hits II",
+        :created_at => Wed, 30 Jan 2008 14:00:12 UTC +00:00,
+        :updated_at => Wed, 29 Jan 2014 22:14:02 UTC +00:00
+    },
+    [1] #<Album:0x0055cd61346c80> {
+                :id => 185,
+         :artist_id => 51,
+             :title => "Greatest Hits I",
+        :created_at => Sat, 29 Dec 2007 12:02:13 UTC +00:00,
+        :updated_at => Wed, 29 Jan 2014 22:14:02 UTC +00:00
+    },
+    [2] #<Album:0x0055cd613462f8> {
+                :id => 186,
+         :artist_id => 51,
+             :title => "News Of The World",
+        :created_at => Wed, 23 Jun 2010 20:50:06 UTC +00:00,
+        :updated_at => Wed, 29 Jan 2014 22:14:02 UTC +00:00
+    }
+]
+--------------------------------------------------------------------------------
+2. Count how many tracks belong to the media type "Protected MPEG-4 video file".
+
+irb(main):014:0> MediaType.where(name: 'Protected MPEG-4 video file')
+  MediaType Load (0.4ms)  SELECT "media_types".* FROM "media_types" WHERE "media_types"."name" = $1  [["name", "Protected MPEG-4 video file"]]
+/home/jonathan/.rbenv/versions/2.4.1/lib/ruby/gems/2.4.0/gems/awesome_print-1.7.0/lib/awesome_print/formatters/base_formatter.rb:31: warning: constant ::Fixnum is deprecated
+[
+    [0] #<MediaType:0x0055cd610bda90> {
+                :id => 3,
+              :name => "Protected MPEG-4 video file",
+        :created_at => Fri, 07 Dec 2007 13:17:17 UTC +00:00,
+        :updated_at => Wed, 29 Jan 2014 22:14:22 UTC +00:00
+    }
+]
+
+irb(main):015:0> Track.where(media_type_id: 3).count
+   (0.9ms)  SELECT COUNT(*) FROM "tracks" WHERE "tracks"."media_type_id" = $1  [["media_type_id", 3]]
+214
+--------------------------------------------------------------------------------
+3. Find the genre with the name "Hip Hop/Rap".
+
+irb(main):018:0> Genre.find_by(name: 'Hip Hop/Rap')
+  Genre Load (0.6ms)  SELECT  "genres".* FROM "genres" WHERE "genres"."name" = $1 LIMIT $2  [["name", "Hip Hop/Rap"], ["LIMIT", 1]]
+#<Genre:0x0055cd6049aa38> {
+            :id => 17,
+          :name => "Hip Hop/Rap",
+    :created_at => Sun, 20 Jan 2013 02:04:31 UTC +00:00,
+    :updated_at => Wed, 29 Jan 2014 22:14:08 UTC +00:00
+}
+--------------------------------------------------------------------------------
+4. Count how many tracks belong to the "Hip Hop/Rap" genre
+
+irb(main):019:0> Track.where(genre_id: 17).count
+   (0.9ms)  SELECT COUNT(*) FROM "tracks" WHERE "tracks"."genre_id" = $1  [["genre_id", 17]]
+35
+--------------------------------------------------------------------------------
+5. Find the total amount of time required to listen to all the tracks in the database.
+
+irb(main):025:0> Track.sum('milliseconds')
+   (0.9ms)  SELECT SUM("tracks"."milliseconds") FROM "tracks"
+1378575827
+--------------------------------------------------------------------------------
+6. Find the highest price of any track that has the media type "MPEG audio file".
+
+irb(main):027:0> MediaType.where(name: 'MPEG audio file')
+  MediaType Load (0.4ms)  SELECT "media_types".* FROM "media_types" WHERE "media_types"."name" = $1  [["name", "MPEG audio file"]]
+[
+    [0] #<MediaType:0x0055cd62b50420> {
+                :id => 1,
+              :name => "MPEG audio file",
+        :created_at => Fri, 24 Nov 2006 08:21:33 UTC +00:00,
+        :updated_at => Wed, 29 Jan 2014 22:14:22 UTC +00:00
+    }
+]
+
+Track.where(media_type_id: 1).order(unit_price: :asc)
+Track.where(media_type_id: 1).order(unit_price: :desc)
+--------------------------------------------------------------------------------
+7. Find the name of the most expensive track that has the media type "MPEG audio file".
+
+irb(main):051:0> Track.where(media_type_id: 1).order(unit_price: :asc).limit(1)
+  Track Load (1.6ms)  SELECT  "tracks".* FROM "tracks" WHERE "tracks"."media_type_id" = $1 ORDER BY "tracks"."unit_price" ASC LIMIT $2  [["media_type_id", 1], ["LIMIT", 1]]
+[
+    [0] #<Track:0x0055cd63047c08> {
+                   :id => 6,
+             :album_id => 1,
+             :genre_id => 1,
+        :media_type_id => 1,
+                 :name => "Put The Finger On You",
+             :composer => "Angus Young, Malcolm Young, Brian Johnson",
+         :milliseconds => 205662,
+                :bytes => 6713451,
+           :unit_price => 0.99,
+           :created_at => Mon, 03 Jan 2005 05:49:26 UTC +00:00,
+           :updated_at => Wed, 29 Jan 2014 22:14:56 UTC +00:00
+    }
+]
+
+irb(main):052:0> Track.where(media_type_id: 1).order(unit_price: :desc).limit(1)
+  Track Load (3.7ms)  SELECT  "tracks".* FROM "tracks" WHERE "tracks"."media_type_id" = $1 ORDER BY "tracks"."unit_price" DESC LIMIT $2  [["media_type_id", 1], ["LIMIT", 1]]
+[
+    [0] #<Track:0x0055cd63016ba8> {
+                   :id => 6,
+             :album_id => 1,
+             :genre_id => 1,
+        :media_type_id => 1,
+                 :name => "Put The Finger On You",
+             :composer => "Angus Young, Malcolm Young, Brian Johnson",
+         :milliseconds => 205662,
+                :bytes => 6713451,
+           :unit_price => 0.99,
+           :created_at => Mon, 03 Jan 2005 05:49:26 UTC +00:00,
+           :updated_at => Wed, 29 Jan 2014 22:14:56 UTC +00:00
+    }
+]
+--------------------------------------------------------------------------------
+8. Find the 2 oldest artists.
+
+irb(main):045:0> Artist.order(created_at: :asc).limit(2)
+  Artist Load (0.8ms)  SELECT  "artists".* FROM "artists" ORDER BY "artists"."created_at" ASC LIMIT $1  [["LIMIT", 2]]
+[
+    [0] #<Artist:0x0055cd63141b18> {
+                :id => 258,
+              :name => "Les Arts Florissants & William Christie",
+        :created_at => Fri, 13 Feb 2004 06:08:36 UTC +00:00,
+        :updated_at => Wed, 29 Jan 2014 22:10:22 UTC +00:00
+    },
+    [1] #<Artist:0x0055cd631417d0> {
+                :id => 31,
+              :name => "Baby Consuelo",
+        :created_at => Mon, 16 Feb 2004 22:04:39 UTC +00:00,
+        :updated_at => Wed, 29 Jan 2014 22:10:22 UTC +00:00
+    }
+]
+--------------------------------------------------------------------------------
+9. Find the least expensive track that has the genre "Electronica/Dance".
+
+irb(main):048:0> Genre.find_by(name: 'Electronica/Dance')
+  Genre Load (0.7ms)  SELECT  "genres".* FROM "genres" WHERE "genres"."name" = $1 LIMIT $2  [["name", "Electronica/Dance"], ["LIMIT", 1]]
+#<Genre:0x0055cd630cf798> {
+            :id => 15,
+          :name => "Electronica/Dance",
+    :created_at => Sun, 25 May 2008 12:13:42 UTC +00:00,
+    :updated_at => Wed, 29 Jan 2014 22:14:08 UTC +00:00
+}
+
+irb(main):049:0> Track.where(genre_id: 15).order(unit_price: :asc).limit(1)
+  Track Load (0.7ms)  SELECT  "tracks".* FROM "tracks" WHERE "tracks"."genre_id" = $1 ORDER BY "tracks"."unit_price" ASC LIMIT $2  [["genre_id", 15], ["LIMIT", 1]]
+[
+    [0] #<Track:0x0055cd630ac1a8> {
+                   :id => 3319,
+             :album_id => 259,
+             :genre_id => 15,
+        :media_type_id => 1,
+                 :name => "Instinto Colectivo",
+             :composer => nil,
+         :milliseconds => 300564,
+                :bytes => 12024875,
+           :unit_price => 0.99,
+           :created_at => Mon, 27 Sep 2004 22:40:29 UTC +00:00,
+           :updated_at => Wed, 29 Jan 2014 22:15:04 UTC +00:00
+    }
+]
+
+irb(main):050:0> Track.where(genre_id: 15).order(unit_price: :desc).limit(1)
+  Track Load (1.8ms)  SELECT  "tracks".* FROM "tracks" WHERE "tracks"."genre_id" = $1 ORDER BY "tracks"."unit_price" DESC LIMIT $2  [["genre_id", 15], ["LIMIT", 1]]
+[
+    [0] #<Track:0x0055cd630779f8> {
+                   :id => 3319,
+             :album_id => 259,
+             :genre_id => 15,
+        :media_type_id => 1,
+                 :name => "Instinto Colectivo",
+             :composer => nil,
+         :milliseconds => 300564,
+                :bytes => 12024875,
+           :unit_price => 0.99,
+           :created_at => Mon, 27 Sep 2004 22:40:29 UTC +00:00,
+           :updated_at => Wed, 29 Jan 2014 22:15:04 UTC +00:00
+    }
+]
+--------------------------------------------------------------------------------
+10. Find all "MPEG autio file" tracks in the genre "Electronica/Dance".
+
+irb(main):053:0> Track.where(genre_id: 15).where(media_type_id: 1)
+  Track Load (1.0ms)  SELECT "tracks".* FROM "tracks" WHERE "tracks"."genre_id" = $1 AND "tracks"."media_type_id" = $2  [["genre_id", 15], ["media_type_id", 1]]
+28
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Stretch: More Active Record Query Interface
+
+1. Find all the albums whose titles start with B.
+
+irb(main):080:0> Album.where("title ILIKE ?", 'B%').order(title: :asc)
+  Album Load (2.3ms)  SELECT "albums".* FROM "albums" WHERE (title ILIKE 'B%') ORDER BY "albums"."title" ASC
+
+irb(main):082:0> Album.where("title ILIKE ?", 'B%').order(title: :desc)
+  Album Load (1.6ms)  SELECT "albums".* FROM "albums" WHERE (title ILIKE 'B%') ORDER BY "albums"."title" DESC
+
+35
+--------------------------------------------------------------------------------
+2. Find the all the artists whose names start with A.
+
+irb(main):086:0> Artist.where("name ILIKE ?", 'A%').order(name: :asc)
+  Artist Load (2.1ms)  SELECT "artists".* FROM "artists" WHERE (name ILIKE 'A%') ORDER BY "artists"."name" ASC
+
+irb(main):087:0> Artist.where("name ILIKE ?", 'A%').order(name: :desc)
+  Artist Load (0.9ms)  SELECT "artists".* FROM "artists" WHERE (name ILIKE 'A%') ORDER BY "artists"."name" DESC
+
+26
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Stretch: Querying the Chinook Database using SQL
+
+1. Find the albums recorded by the artist Queen.
+
+chinook_development=# SELECT * FROM artists WHERE name = 'Queen';
+ id | name  |         created_at         |         updated_at
+----+-------+----------------------------+----------------------------
+ 51 | Queen | 2006-01-08 22:57:01.166112 | 2014-01-29 22:10:22.166366
+(1 row)
+
+chinook_development=# SELECT * FROM albums WHERE artist_id = 51;
+id  | artist_id |       title       |         created_at         |         updated_at
+-----+-----------+-------------------+----------------------------+----------------------------
+ 36 |        51 | Greatest Hits II  | 2008-01-30 14:00:12.455894 | 2014-01-29 22:14:02.456155
+185 |        51 | Greatest Hits I   | 2007-12-29 12:02:13.672295 | 2014-01-29 22:14:02.672569
+186 |        51 | News Of The World | 2010-06-23 20:50:06.971442 | 2014-01-29 22:14:02.971684
+(3 rows)
+
+chinook_development=# SELECT * FROM albums WHERE artist_id = (SELECT id FROM artists WHERE name = 'Queen');
+id  | artist_id |       title       |         created_at         |         updated_at
+-----+-----------+-------------------+----------------------------+----------------------------
+ 36 |        51 | Greatest Hits II  | 2008-01-30 14:00:12.455894 | 2014-01-29 22:14:02.456155
+185 |        51 | Greatest Hits I   | 2007-12-29 12:02:13.672295 | 2014-01-29 22:14:02.672569
+186 |        51 | News Of The World | 2010-06-23 20:50:06.971442 | 2014-01-29 22:14:02.971684
+(3 rows)
+--------------------------------------------------------------------------------
+2. Count how many tracks belong to the media type "Protected MPEG-4 video file".
+
+chinook_development=# SELECT * FROM media_types WHERE name = 'Protected MPEG-4 video file';
+id |            name             |         created_at         |         updated_at
+----+-----------------------------+----------------------------+----------------------------
+ 3 | Protected MPEG-4 video file | 2007-12-07 13:17:17.805185 | 2014-01-29 22:14:22.805487
+(1 row)
+
+chinook_development=# SELECT COUNT(*) FROM tracks WHERE media_type_id = 3;
+ count
+-------
+   214
+(1 row)
+
+chinook_development=# SELECT COUNT(*) FROM tracks WHERE media_type_id = (SELECT id FROM media_types WHERE name = 'Protected MPEG-4 video file');
+ count
+-------
+   214
+(1 row)
+--------------------------------------------------------------------------------
+3. Find the least expensive track that has the genre "Electronica/Dance".
+
+chinook_development=# SELECT * FROM genres WHERE name = 'Electronica/Dance';
+id |       name        |        created_at         |         updated_at
+----+-------------------+---------------------------+----------------------------
+15 | Electronica/Dance | 2008-05-25 12:13:42.91584 | 2014-01-29 22:14:08.916059
+(1 row)
+
+chinook_development=# SELECT * FROM tracks WHERE genre_id = 15 ORDER BY unit_price ASC LIMIT 1;
+id  | album_id | genre_id | media_type_id |        name        | composer | milliseconds |  bytes   | unit_price |         created_at         |         updated_at
+------+----------+----------+---------------+--------------------+----------+--------------+----------+------------+----------------------------+----------------------------
+3319 |      259 |       15 |             1 | Instinto Colectivo |          |       300564 | 12024875 |       0.99 | 2004-09-27 22:40:29.778016 | 2014-01-29 22:15:04.377727
+(1 row)
+
+chinook_development=# SELECT * FROM tracks WHERE genre_id = 15 ORDER BY unit_price DESC LIMIT 1;
+id  | album_id | genre_id | media_type_id |        name        | composer | milliseconds |  bytes   | unit_price |         created_at         |         updated_at
+------+----------+----------+---------------+--------------------+----------+--------------+----------+------------+----------------------------+----------------------------
+3319 |      259 |       15 |             1 | Instinto Colectivo |          |       300564 | 12024875 |       0.99 | 2004-09-27 22:40:29.778016 | 2014-01-29 22:15:04.377727
+(1 row)
+
+chinook_development=# SELECT * FROM tracks WHERE genre_id = (SELECT id FROM genres WHERE name = 'Electronica/Dance') ORDER BY unit_price ASC LIMIT 1;
+id  | album_id | genre_id | media_type_id |        name        | composer | milliseconds |  bytes   | unit_price |         created_at         |         updated_at
+------+----------+----------+---------------+--------------------+----------+--------------+----------+------------+----------------------------+----------------------------
+3319 |      259 |       15 |             1 | Instinto Colectivo |          |       300564 | 12024875 |       0.99 | 2004-09-27 22:40:29.778016 | 2014-01-29 22:15:04.377727
+(1 row)
+--------------------------------------------------------------------------------
+4. Find the all the artists whose names start with A.
+
+chinook_development=# SELECT * FROM artists WHERE (name ILIKE 'A%') ORDER BY name ASC;
+26 rows
+--------------------------------------------------------------------------------
+5. Find all the tracks that belong to playlist 1.
